@@ -57,12 +57,36 @@ const insertPermission = async (payload: NSUser.Permission) => {
 }
 
 //router /:id and send the id for the function 
-const getUserWithRolesPermission = async (id: string)=>{
+const getUserWithRolesPermission = async (id: string) => {
     return await User.findOne({ where: { id }, relations: ['roles', 'roles.permissions'] });
 }
+
+const assignRoleToUser = async (payload: { roleId: string, userId: string }) => {
+    let user;
+    let role;
+
+    try {
+        user = await User.findOne({ where: { id: payload.userId }, relations: ['roles'] })
+        role = await Role.findOne({ where: { id: payload.roleId } })
+        if (user && role) {
+            const existingRole = user.roles.includes(role)
+            if (existingRole) return ('user already has this role')
+            user.roles.push(role)
+            return user.save()
+        }
+
+    } catch (err) {
+        console.error(err);
+        if (!user) throw ('user not found')
+        if (!role) throw ('role not found')
+    }
+}
+
 
 export {
     insertPermission,
     insertRole,
-    insertUser
+    insertUser,
+    getUserWithRolesPermission,
+    assignRoleToUser
 }

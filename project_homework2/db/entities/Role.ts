@@ -1,11 +1,11 @@
-import { Column, JoinTable, PrimaryGeneratedColumn,ManyToMany,BaseEntity,Entity } from "typeorm";
+import { Column, JoinTable, PrimaryGeneratedColumn, ManyToMany, BaseEntity, Entity } from "typeorm";
 import { Permission } from "./Permission.js";
 import { User } from "./User.js";
 
 @Entity()
-export default class Role extends BaseEntity{
+export default class Role extends BaseEntity {
     @PrimaryGeneratedColumn('uuid')
-    id : string
+    id: string
 
     @Column({ unique: true })
     name: string;
@@ -14,7 +14,7 @@ export default class Role extends BaseEntity{
     @JoinTable()
     users: User[];
 
-    @ManyToMany(()=> Permission, {cascade: true, eager: true})
+    @ManyToMany(() => Permission, { cascade: true, eager: true })
     @JoinTable()
     permissions: Permission[];
 }

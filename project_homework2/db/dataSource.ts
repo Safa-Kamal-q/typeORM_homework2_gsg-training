@@ -18,15 +18,16 @@ const dataSource = new DataSource({
         Role,
         Permission
     ],
-    migrations: ['./**/migration/*.ts'],
-    synchronize: false,
+    // migrations: ['./**/migration/*.ts'],
+    synchronize: true,
     logging: false
 })
 
-dataSource.initialize().then(()=>{
-    console.log("Connected to DB")
-}).catch(err=>{
-    console.log('Failed to connect to BD, '+ err)
-})
+export const initDB = async () =>
+  await dataSource.initialize().then(() => {
+    console.log("Connected to DB!");
+  }).catch(err => {
+    console.error('Failed to connect to DB: ' + err);
+  });
 
 export default dataSource

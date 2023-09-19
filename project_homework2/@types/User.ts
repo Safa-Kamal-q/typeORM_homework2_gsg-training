@@ -13,9 +13,9 @@ export namespace NSUser {
     password: string;
     type: Type;
     createdAt: Date;
-    firstName: string 
-    lastName: string 
-    dateOfBirth: string 
+    firstName: string
+    lastName: string
+    dateOfBirth: string
   }
 
   export interface Role {
@@ -23,7 +23,7 @@ export namespace NSUser {
     name: string;
     permissions: number[];
   }
-  
+
   export interface Permission {
     id: number;
     name: string;

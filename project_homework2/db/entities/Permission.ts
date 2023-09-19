@@ -1,10 +1,10 @@
-import { Column, PrimaryGeneratedColumn,BaseEntity,Entity } from "typeorm";
+import { Column, PrimaryGeneratedColumn, BaseEntity, Entity } from "typeorm";
 
 @Entity()
-export class Permission extends BaseEntity{
+export class Permission extends BaseEntity {
     @PrimaryGeneratedColumn('increment')
-    id: number 
+    id: number
 
-    @Column({unique: true})
-    name: string 
+    @Column({ unique: true })
+    name: string
 }
