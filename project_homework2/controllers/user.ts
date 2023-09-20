@@ -5,6 +5,8 @@ import Role from "../db/entities/Role.js";
 import { User } from "../db/entities/User.js";
 import { Profile } from "../db/entities/Profile.js";
 import { Permission } from "../db/entities/Permission.js";
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken'
 
 
 const insertUser = async (payload: NSUser.Item) => {
@@ -82,11 +84,37 @@ const assignRoleToUser = async (payload: { roleId: string, userId: string }) => 
     }
 }
 
+const login = async (userName: string, password: string) => {
+    try {
+        const user = await User.findOneBy({
+            userName
+        });
+        const passwordMatching = await bcrypt.compare(password, user?.password || '');
+
+        if (passwordMatching && user) {
+            const token = jwt.sign({
+                email: user.email,
+                userName: user.userName
+            },
+                process.env.SECRET_KEY || '',
+                {
+                    expiresIn: '14d'
+                }
+            )
+            return token
+        } else {
+            return 'invalid userName or password'
+        }
+    } catch (err) {
+        return err;
+    }
+}
 
 export {
     insertPermission,
     insertRole,
     insertUser,
     getUserWithRolesPermission,
-    assignRoleToUser
+    assignRoleToUser,
+    login
 }
