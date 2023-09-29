@@ -20,7 +20,7 @@ const validateUser = (req: express.Request, res: express.Response, next: NextFun
         errorList.push('The password length should at least be 6')
     }
 
-    if (!['main', 'user', 'editor'].includes(user.type)) {
+    if (!['admin', 'user', 'editor'].includes(user.type)) {
         errorList.push('invalid type')
     }
 

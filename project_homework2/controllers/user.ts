@@ -11,13 +11,15 @@ import jwt from 'jsonwebtoken'
 
 const insertUser = async (payload: NSUser.Item) => {
     return dataSource.manager.transaction(async transaction => {
-        const roles = await Role.find({ where: { name: payload.type } });
-
+        //  const roles = await Role.find({ where: { name: payload.type } });
+        const roles = await Role.findBy({
+          id: In(payload.roles)
+      })
         const newUser = User.create({
             ...payload,
             roles: roles
         });
-
+       
         await transaction.save(newUser);
 
         const profile = Profile.create({
@@ -64,51 +66,55 @@ const getUserWithRolesPermission = async (id: string) => {
 }
 
 const assignRoleToUser = async (payload: { roleId: string, userId: string }) => {
-    let user;
-    let role;
+  const user = await User.findOne({ where: { id: payload.userId }, relations: ["roles"] });
+  const role = await Role.findOne({ where: { id: payload.roleId } });
 
-    try {
-        user = await User.findOne({ where: { id: payload.userId }, relations: ['roles'] })
-        role = await Role.findOne({ where: { id: payload.roleId } })
-        if (user && role) {
-            const existingRole = user.roles.includes(role)
-            if (existingRole) return ('user already has this role')
-            user.roles.push(role)
-            return user.save()
-        }
+  if (user && role) {
+    const existingRole = user.roles.includes(role)
 
-    } catch (err) {
-        console.error(err);
-        if (!user) throw ('user not found')
-        if (!role) throw ('role not found')
+    if (!existingRole) {
+      user.roles.push(role);
+      return user.save();
+    } else {
+      return "User already has this role.";
     }
+  } else {
+    if (!user) {
+      return "User not found :(";
+    } else {
+      return "Role not found :(";
+    }
+  }
 }
 
 const login = async (userName: string, password: string) => {
     try {
-        const user = await User.findOneBy({
-            userName
-        });
-        const passwordMatching = await bcrypt.compare(password, user?.password || '');
-
-        if (passwordMatching && user) {
-            const token = jwt.sign({
-                email: user.email,
-                userName: user.userName
-            },
-                process.env.SECRET_KEY || '',
-                {
-                    expiresIn: '14d'
-                }
-            )
-            return token
-        } else {
-            return 'invalid userName or password'
-        }
-    } catch (err) {
-        return err;
+      const user = await User.findOneBy({
+        userName
+      });
+  
+      const passwordMatching = await bcrypt.compare(password, user?.password || '');
+  
+      if (user && passwordMatching) {
+        const token = jwt.sign(
+          {
+            email: user.email,
+            userName: user.userName
+          },
+          process.env.SECRET_KEY || '',
+          {
+            expiresIn: "14d"
+          }
+        );
+  
+        return token;
+      } else {
+        throw ("Invalid Username or password!");
+      }
+    } catch (error) {
+      throw ("Invalid Username or password!");
     }
-}
+  }
 
 export {
     insertPermission,

@@ -10,10 +10,6 @@ export default class Role extends BaseEntity {
     @Column({ unique: true })
     name: string;
 
-    @ManyToMany(() => User, user => user.roles)
-    @JoinTable()
-    users: User[];
-
     @ManyToMany(() => Permission, { cascade: true, eager: true })
     @JoinTable()
     permissions: Permission[];

@@ -16,6 +16,7 @@ export namespace NSUser {
     firstName: string
     lastName: string
     dateOfBirth: string
+    roles: Role[]
   }
 
   export interface Role {

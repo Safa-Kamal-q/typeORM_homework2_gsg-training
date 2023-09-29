@@ -1,24 +1,23 @@
 import express from 'express';
 import { validateUser } from '../middleware/validation/user.js';
-import { assignRoleToUser, getUserWithRolesPermission, insertRole, insertUser, login } from '../controllers/user.js';
+import {  assignRoleToUser, getUserWithRolesPermission, insertPermission, insertRole, insertUser, login } from '../controllers/user.js';
 import { authenticate } from '../middleware/auth/authenticate.js';
 import { authorize } from '../middleware/auth/authorize.js';
 
 
 const router = express.Router();
 
-router.post('/', authorize('POST_users'),validateUser, (req, res) => {
+router.post('/',validateUser, (req, res) => {
     insertUser(req.body).then(() => {
-        res.status(201).send()
+        res.status(201).send('user added successfully')
     }).catch(err => {
         console.error(err);
         res.status(500).send('Something went wrong');
     });
 });
 
-router.post('/role',authorize('POST_users/role'),authenticate, (req, res) => {
+router.post('/role', authenticate,(req, res) => {
     const role = req.body
-    console.log(role.name) //this for test the value for role.name
     if (!role.name) {
         res.status(400).send("The name of the role is require")
     }
@@ -26,16 +25,16 @@ router.post('/role',authorize('POST_users/role'),authenticate, (req, res) => {
         res.status(201).send(data)
     }).catch(err => {
         console.log(err);
-        res.status(500).send("Something went wrong")
+        res.status(500).send(err)
     })
 })
 
-router.post('/permission',authenticate, (req, res) => {
+router.post('/permission', authenticate,(req, res) => {
     const permission = req.body;
     if (!permission.name) {
         res.status(400).send("The name of the permission is require")
     }
-    insertRole(permission).then((data) => {
+    insertPermission(permission).then((data) => {
         res.status(201).send(data)
     }).catch(err => {
         console.log(err);
@@ -43,8 +42,8 @@ router.post('/permission',authenticate, (req, res) => {
     })
 })
 
-router.get('/:id', (req, res) => {
-    const id = req.params.toString();
+router.get('/:id',authenticate,authorize('GET_users/:id'), (req, res) => {
+    const id = String(req.params.id);
     getUserWithRolesPermission(id).then((data) => {
         res.status(200).send(data)
     }).catch(err => {
@@ -53,28 +52,26 @@ router.get('/:id', (req, res) => {
     })
 })
 
-router.put('/assign-role', (req, res) => {
+router.put("/assign_role",authenticate,authorize('PUT_users/assign_role'), (req, res, next) => {
     assignRoleToUser(req.body).then((data) => {
-        res.send(200).send(data)
+      res.status(201).send('Role added to user successfully')
     }).catch(err => {
-        console.log(err)
-        res.status(404).send(err)
-    })
-})
+      console.error(err);
+      res.status(500).send(err);
+    });
+  });
 
 router.post('/login', (req, res) => {
     const userName = req.body.userName;
     const password = req.body.password;
-
-    login(userName, password).then(data => {
-        res.send('data')
-    }).catch(err => {
-        console.log(err)
-        res.send('Something went wrong ')
-    })
-
-
-})
-
+  
+    login(userName, password)
+      .then(data => {
+        res.send(data);
+      })
+      .catch(err => {
+        res.status(401).send(err);
+      })
+  });
 
 export default router;
