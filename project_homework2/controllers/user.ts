@@ -10,7 +10,7 @@ import jwt from 'jsonwebtoken'
 
 
 const insertUser = async (payload: NSUser.Item) => {
-    return dataSource.manager.transaction(async transaction => {
+    return await dataSource.manager.transaction(async transaction => {
         //  const roles = await Role.find({ where: { name: payload.type } });
         const roles = await Role.findBy({
           id: In(payload.roles)
